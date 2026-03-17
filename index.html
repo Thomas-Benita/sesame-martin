@@ -281,54 +281,7 @@
       transition: width .8s cubic-bezier(.4,0,.2,1);
     }
 
-    /* Notification hint */
-    .notif-block {
-      position: relative;
-      z-index: 1;
-      max-width: 420px;
-      width: 100%;
-      margin-top: 24px;
-      background: rgba(255,77,28,.07);
-      border: 1px solid rgba(255,77,28,.2);
-      border-radius: 14px;
-      padding: 16px 18px;
-      animation: fadeUp .7s .6s ease both;
-    }
-    .notif-block h3 {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1rem;
-      letter-spacing: .12em;
-      color: var(--accent2);
-      margin-bottom: 6px;
-    }
-    .notif-block p {
-      font-size: .72rem;
-      font-weight: 300;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .notif-btn {
-      margin-top: 12px;
-      background: var(--accent2);
-      color: #fff;
-      font-family: 'DM Sans', sans-serif;
-      font-size: .72rem;
-      font-weight: 500;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      border: none;
-      border-radius: 8px;
-      padding: 9px 18px;
-      cursor: pointer;
-      transition: opacity .2s;
-    }
-    .notif-btn:hover { opacity: .85; }
-    .notif-status {
-      margin-top: 8px;
-      font-size: .65rem;
-      color: var(--accent);
-      display: none;
-    }
+
 
     /* Footer */
     footer {
@@ -402,12 +355,7 @@
     </div>
   </div>
 
-  <div class="notif-block">
-    <h3>🔔 Rappel quotidien à midi</h3>
-    <p>Active les notifications pour recevoir la citation du jour et le compte à rebours chaque midi directement sur ton téléphone.</p>
-    <button class="notif-btn" id="notif-btn" onclick="askNotif()">Activer les notifications</button>
-    <p class="notif-status" id="notif-status"></p>
-  </div>
+
 
   <footer>
     <strong>SESAME 2026</strong> · Fait avec ❤️ par ta famille · Bonne chance Martin !
@@ -504,77 +452,11 @@
     showQuote(next);
   }
 
-  // ── Notifications ────────────────────────────────────────────────
-  function askNotif() {
-    const btn = document.getElementById('notif-btn');
-    const status = document.getElementById('notif-status');
 
-    if (!('Notification' in window)) {
-      status.style.display = 'block';
-      status.textContent = '⚠️ Ton navigateur ne supporte pas les notifications. Essaie Chrome ou Safari sur iOS 16.4+.';
-      return;
-    }
-
-    Notification.requestPermission().then(perm => {
-      status.style.display = 'block';
-      if (perm === 'granted') {
-        btn.style.display = 'none';
-        status.textContent = '✅ Notifications activées ! Tu recevras un rappel chaque midi.';
-        scheduleNoonNotif();
-        // Register service worker for background
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('#').catch(() => {});
-        }
-      } else {
-        status.textContent = '❌ Permission refusée. Active-les manuellement dans les réglages du navigateur.';
-      }
-    });
-  }
-
-  function scheduleNoonNotif() {
-    // Schedule for next noon
-    const now = new Date();
-    const noon = new Date(now);
-    noon.setHours(12, 0, 0, 0);
-    if (noon <= now) noon.setDate(noon.getDate() + 1);
-    const delay = noon - now;
-
-    setTimeout(() => {
-      const d = getDaysLeft();
-      const q = quotes[getDailyQuoteIndex()];
-      if (Notification.permission === 'granted') {
-        new Notification(`🎯 SESAME – J-${d} Martin !`, {
-          body: q.text + '\n— ' + q.author,
-          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%230a0a0f"/><text y=".9em" font-size="80" x="10">🎯</text></svg>',
-          badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%23f5c400"/></svg>',
-        });
-      }
-      // Reschedule for next day
-      setInterval(() => {
-        if (Notification.permission === 'granted') {
-          const d2 = getDaysLeft();
-          const q2 = quotes[getDailyQuoteIndex()];
-          new Notification(`🎯 SESAME – J-${d2} Martin !`, {
-            body: q2.text + '\n— ' + q2.author,
-          });
-        }
-      }, 24 * 60 * 60 * 1000);
-    }, delay);
-  }
-
-  // ── Init ─────────────────────────────────────────────────────────
   updateCountdown();
   showQuote(getDailyQuoteIndex());
 
-  // Check if notif already granted
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-    document.getElementById('notif-btn').style.display = 'none';
-    document.getElementById('notif-status').style.display = 'block';
-    document.getElementById('notif-status').textContent = '✅ Notifications déjà activées !';
-    scheduleNoonNotif();
-  }
-
-  setInterval(updateCountdown, 60000);
+setInterval(updateCountdown, 60000);
 </script>
 </body>
 </html>
